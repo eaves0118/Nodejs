@@ -3,6 +3,9 @@
 const shopModel = require("../models/shop.model");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
+const KeyTokenService = require("./keytoken.service");
+const { createTokenPair } = require("../auth/authUtils");
+
 const RoleShop = {
   SHOP: "SHOP",
   WRITER: "WRITER",
@@ -11,7 +14,7 @@ const RoleShop = {
 };
 
 class AccessService {
-  static signUp = async ({ name, email, password }) => {
+  signUp = async ({ name, email, password }) => {
     try {
       //step 1 check email exists??
       const hodelShop = await shopModel.findOne({ email }).lean();
@@ -31,6 +34,20 @@ class AccessService {
         });
 
         console.log({ privateKey, publicKey }); //Save collection KeyStore
+
+        const publicKeyString = await KeyTokenService.createKeyToken({
+          userId: newShop._id,
+          publicKey,
+        });
+
+        if (!publicKeyString) {
+          return {
+            code: "xxx",
+            message: "publicKeyString error",
+          };
+        }
+
+        const tokens = await createTokenPair();
       }
     } catch (error) {
       return {
@@ -42,4 +59,4 @@ class AccessService {
   };
 }
 
-module.exports = AccessService;
+module.exports = new AccessService();

@@ -8,6 +8,7 @@ const app = express();
 app.use(morgan("dev"));
 app.use(helmet());
 app.use(compression());
+app.use(express.json());
 
 //init database
 require("./dbs/init.mongodb");
